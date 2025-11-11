@@ -1,10 +1,44 @@
 # HydraContext
 
-**Intelligent context chunking for LLM memory systems**
+**Intelligent LLM context processing and normalization**
 
-HydraContext is a robust Python library for text segmentation, classification, and deduplication designed specifically for building LLM memory layers. It intelligently segments text into meaningful chunks while distinguishing between code, prose, and structured data.
+HydraContext is a comprehensive Python library for LLM integration, providing bidirectional normalization, prompt/response processing, and intelligent text segmentation. It offers a unified interface for working with multiple LLM providers (OpenAI, Anthropic, Ollama) while handling context chunking, classification, and deduplication for memory layers and RAG pipelines.
 
 ## Features
+
+### LLM Integration & Normalization
+
+- **🔄 Bidirectional Normalization**
+  - Normalize prompts for different LLM providers
+  - Parse and unify responses from OpenAI, Anthropic, Ollama
+  - Provider-specific optimizations (streaming, formatting)
+  - Consistent interface across all providers
+
+- **💬 Prompt Processing**
+  - Intelligent prompt classification (code, conversation, instruction, example, system)
+  - Smart prompt segmentation with context overlap
+  - Token estimation and length management
+  - Automatic deduplication with hash-based tracking
+
+- **📤 Response Processing**
+  - Multi-provider response parsing and normalization
+  - Streaming response handling
+  - Artifact removal and cleanup
+  - Response comparison and analysis
+
+- **🏗️ Structured Parsing**
+  - Lossless text ↔ JSON conversion with 17 content types
+  - 5 fidelity levels for precision control
+  - Code block, thinking block, and inline formatting detection
+  - Complete reconstruction capability
+
+- **🌐 Multi-Provider Support**
+  - Unified response parser for OpenAI, Anthropic, Ollama
+  - Auto-detection of provider response formats
+  - Token count normalization across providers
+  - Provider metadata preservation
+
+### Text Processing & Analysis
 
 - **🔪 Smart Segmentation**
   - Sentence and paragraph boundary detection
@@ -58,8 +92,8 @@ HydraContext is a robust Python library for text segmentation, classification, a
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/hydracontext.git
-cd hydracontext
+git clone https://github.com/BenevolentJoker-JohnL/HydraContext.git
+cd HydraContext
 pip install -e .
 ```
 
@@ -71,56 +105,108 @@ pip install hydracontext
 
 ## Quick Start
 
-### Command Line Usage
-
-```bash
-# Basic sentence segmentation
-hydracontext process input.txt -o output.jsonl
-
-# Paragraph segmentation with statistics
-hydracontext process input.txt -o output.jsonl -g paragraph --stats stats.json
-
-# With deduplication cache
-hydracontext process input.txt -o output.jsonl --cache cache.jsonl
-
-# Disable classification
-hydracontext process input.txt -o output.jsonl --no-classify
-
-# Enable debug logging
-hydracontext process input.txt -o output.jsonl --log-level DEBUG
-
-# Force streaming mode for large files
-hydracontext process large_file.txt -o output.jsonl --streaming
-
-# Save logs to file
-hydracontext process input.txt -o output.jsonl --log-file processing.log
-
-# Custom streaming threshold (100MB)
-hydracontext process input.txt -o output.jsonl --streaming-threshold 100
-```
-
-### Python API
+### Bidirectional Normalization (LLM Integration)
 
 ```python
-from hydracontext import ContextSegmenter, ContentDeduplicator, ContentClassifier
+from hydracontext import ContextNormalizer
+
+# Initialize normalizer
+normalizer = ContextNormalizer()
+
+# Normalize input prompt for any LLM provider
+prompt = "Explain quantum computing"
+normalized_input = normalizer.normalize_input(prompt)
+
+# Parse and normalize LLM response (auto-detects provider format)
+openai_response = {"choices": [{"message": {"content": "Quantum computing..."}}]}
+normalized_output = normalizer.normalize_output(openai_response)
+
+# Works with OpenAI, Anthropic, Ollama - unified interface!
+print(normalized_output['content'])  # Clean, normalized text
+```
+
+### Prompt Processing
+
+```python
+from hydracontext.core.prompt_processor import (
+    normalize_prompt,
+    detect_prompt_type,
+    split_prompt,
+    PromptProcessor
+)
+
+# Normalize messy prompts
+clean = normalize_prompt("   What  is   AI?   \n\n\n")  # "What is AI?"
+
+# Classify prompt type
+prompt_type = detect_prompt_type("```python\ndef foo(): pass```")  # "code"
+
+# Process with full pipeline
+processor = PromptProcessor(max_chars=2048)
+result = processor.process("Explain transformers in detail...")
+print(result[0]['type'])           # "instruction"
+print(result[0]['token_estimate']) # Estimated token count
+```
+
+### Response Parsing & Structured Parsing
+
+```python
+from hydracontext import UnifiedResponseParser, StructuredParser
+
+# Parse responses from any provider
+parser = UnifiedResponseParser()
+response = parser.parse(raw_api_response)  # Auto-detects provider
+print(response['content'])
+print(response['tokens'])
+
+# Convert text to structured JSON (lossless)
+structured_parser = StructuredParser()
+parsed = structured_parser.parse(
+    "# Heading\n\nParagraph\n\n```python\ncode```",
+    fidelity='high'
+)
+# Returns structured JSON with 17 content types
+# Can reconstruct original text perfectly!
+```
+
+### Text Segmentation & Analysis
+
+```python
+from hydracontext import ContextSegmenter, ContentClassifier, ContentDeduplicator
 
 # Initialize components
 segmenter = ContextSegmenter()
 classifier = ContentClassifier()
 deduplicator = ContentDeduplicator()
 
-# Segment text
+# Segment text intelligently
 text = "Your text here. It can contain code and prose."
 segments = segmenter.segment_text(text, granularity='sentence')
 
-# Classify content
+# Classify and deduplicate
 for segment in segments:
     classification = classifier.classify(segment.text)
     is_duplicate = deduplicator.is_duplicate(segment.text)
 
-    print(f"Text: {segment.text}")
     print(f"Type: {classification.content_type.value}")
+    print(f"Confidence: {classification.confidence:.1%}")
     print(f"Duplicate: {is_duplicate}")
+```
+
+### Command Line Usage
+
+```bash
+# Text segmentation and processing
+hydracontext process input.txt -o output.jsonl
+
+# With classification and deduplication
+hydracontext process input.txt -o output.jsonl -g paragraph --cache cache.jsonl
+
+# Streaming mode for large files
+hydracontext process large_file.txt -o output.jsonl --streaming
+
+# Enable debug logging
+hydracontext process input.txt -o output.jsonl --log-level DEBUG
 ```
 
 ## Core Components
@@ -572,11 +658,20 @@ Typical performance on a modern laptop:
 
 ## Use Cases
 
-- **LLM Memory Systems**: Chunk documents for vector databases
-- **Data Preprocessing**: Clean and deduplicate text datasets
-- **Content Analysis**: Classify and categorize mixed content
-- **Document Processing**: Extract structured information from documents
-- **Code Documentation**: Separate code from prose in technical docs
+### LLM Integration
+- **Multi-Provider Applications**: Build apps that work seamlessly with OpenAI, Anthropic, and Ollama
+- **Response Normalization**: Parse and unify responses from different LLM APIs
+- **Prompt Engineering**: Classify, normalize, and optimize prompts before sending to LLMs
+- **Streaming LLM Applications**: Handle streaming responses with consistent formatting
+- **LLM Comparison Tools**: Compare outputs from different providers with normalized data
+
+### Text Processing & Memory
+- **LLM Memory Systems**: Chunk documents for vector databases and RAG pipelines
+- **Data Preprocessing**: Clean, deduplicate, and structure text datasets
+- **Content Analysis**: Classify and categorize mixed content (code, prose, structured data)
+- **Document Processing**: Extract and segment information from documents
+- **Code Documentation**: Separate code from prose in technical documentation
+- **Knowledge Base Building**: Structure unstructured text for searchable knowledge systems
 
 ## Roadmap
 
@@ -603,9 +698,9 @@ Built for the **Hydra** memory system, designed to provide intelligent context c
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/hydracontext/issues)
+- **Issues**: [GitHub Issues](https://github.com/BenevolentJoker-JohnL/HydraContext/issues)
 - **Documentation**: [Full Documentation](https://hydracontext.readthedocs.io)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/hydracontext/discussions)
+- **Discussions**: [GitHub Discussions](https://github.com/BenevolentJoker-JohnL/HydraContext/discussions)
 
 ---
 

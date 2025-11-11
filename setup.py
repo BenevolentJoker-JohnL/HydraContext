@@ -13,10 +13,10 @@ setup(
     name="hydracontext",
     version="0.1.0",
     author="HydraContext Contributors",
-    description="Intelligent context chunking for LLM memory systems",
+    description="LLM context processing: bidirectional normalization, prompt/response processing, and intelligent text segmentation",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/hydracontext",
+    url="https://github.com/BenevolentJoker-JohnL/HydraContext",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",

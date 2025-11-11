@@ -5,14 +5,36 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hydracontext"
 version = "0.1.0"
-description = "Intelligent context chunking for LLM memory systems"
+description = "LLM context processing: bidirectional normalization, prompt/response processing, and intelligent text segmentation"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
     {name = "HydraContext Contributors"}
 ]
-keywords = ["llm", "context", "chunking", "segmentation", "deduplication", "nlp"]
+keywords = [
+    "llm",
+    "context",
+    "normalization",
+    "prompt-processing",
+    "response-parsing",
+    "openai",
+    "anthropic",
+    "ollama",
+    "chunking",
+    "segmentation",
+    "deduplication",
+    "nlp",
+    "ai",
+    "multi-provider"
+]
+
+[project.urls]
+Homepage = "https://github.com/BenevolentJoker-JohnL/HydraContext"
+Repository = "https://github.com/BenevolentJoker-JohnL/HydraContext"
+Issues = "https://github.com/BenevolentJoker-JohnL/HydraContext/issues"
+Discussions = "https://github.com/BenevolentJoker-JohnL/HydraContext/discussions"
+
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

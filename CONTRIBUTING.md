@@ -26,8 +26,8 @@ Thank you for your interest in contributing to HydraContext! This document provi
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/hydracontext.git
-cd hydracontext
+git clone https://github.com/BenevolentJoker-JohnL/HydraContext.git
+cd HydraContext
 
 # Create virtual environment
 python -m venv venv
